@@ -202,8 +202,8 @@ foreach y of local year_levels{
 		//----------------------------------------------------------------------------
 		// 			Calculate proximity and density
 		//----------------------------------------------------------------------------
-		noi di "continuous is `cont'"
-		noi di "No self is `self'"
+		// noi di "continuous is `cont'"
+		// noi di "No self is `self'"
 		if `calculate_rpop' == 0 & "`cont'"~="" {
 			*noi display "	: Continuous"
 			proxcontinous, levels(RCA)
