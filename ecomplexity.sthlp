@@ -67,7 +67,7 @@ Notice that some of the variables are calculated at different levels (location, 
 {p 4 8} For a more detailed description of the variables please consult the following link: http://atlas.cid.harvard.edu/about/glossary/ {p_end}
 
 
-Warning: If any of the previous variables are defined in the dataset, the program will automatically delete the variables. It would also delete “_merge” or “_fillin” variables if found in the dataset. {p_end}
+Warning: If any of the previous variables are defined in the dataset, the program will automatically delete the variables. It would also delete _merge  or _fillin variables if found in the dataset. {p_end}
 
 
 
