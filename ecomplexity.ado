@@ -56,13 +56,31 @@ else {
 }
 *----------------------------------------------------------------------
 
+
+*----------------------------------------------------------------------
+* M matrix provided? Detecting binary dataset
+*----------------------------------------------------------------------
+*noi di "Binary detection" 
+// if main variable is already in a binary format, 
+// the program will asume it corresponds to the Mcp Matrix
+qui sum `val'
+local l1 = r(min)
+local l2 = r(max)
+if `l1'==0 & `l2'==1 {
+	local l0 = 1   
+}
+else {
+	local l0 = 0 
+}
+*----------------------------------------------------------------------
+
 sort `t' `i' `p'
 
 cap levelsof `t', local(year_levels)
 
 quietly levelsof `t', local(Nt)
 global Nnt: word count `Nt'
-
+display " "
 display "Creates economic complexity variables"
 display "________________________________________________________________________________________________"
 if `t_present' == 1  & $Nnt > 1 { 
@@ -165,13 +183,16 @@ foreach y of local year_levels{
 		if $error_code == 1 exit // error checking
 		*------------------------------------------------
 		
-		
+		// Inmediate Mcp
+		if `l0'==1 {
+			mata M = exp_cp
+		}
 		
 		*------------------------------------------------
 		* Calculate RCA and Rpop
 		*------------------------------------------------
 		// calculate RCA case
-		if `calculate_rpop' == 0 {
+		if `calculate_rpop' == 0 & `l0'==0 {
 			if `rca' == -1 {
 				local rca 1
 			}
@@ -180,14 +201,16 @@ foreach y of local year_levels{
 		}
 		
 		// calculate Rpop case
-		else if `calculate_rpop' == 1 & `rca' == -1 {
+		else if `calculate_rpop' == 1 & `rca' == -1 & `l0'==0 {
 			load_population_mata `i' `pop' `touse'
 			complexity_rpop
 			mata M = (RPOP:>`rpop')
 		}
+		
 		if $error_code == 1 exit		
+		
 		// combination of the two (RCA AND Rpop)
-		else if `calculate_rpop' == 1 & `rca' != -1 {
+		else if `calculate_rpop' == 1 & `rca' != -1 & `l0'==0 {
 			load_population_mata `i' `pop' `touse'
 			complexity_rca
 			complexity_rpop
@@ -196,14 +219,16 @@ foreach y of local year_levels{
 			mata M = M1 + M2 
 			mata M = (M:>0)
 		}
+		
+		
 		*------------------------------------------------
 		
 		
 		//----------------------------------------------------------------------------
 		// 			Calculate proximity and density
 		//----------------------------------------------------------------------------
-		noi di "continuous is `cont'"
-		noi di "No self is `self'"
+		*noi di "continuous is `cont'"
+		*noi di "No self is `self'"
 		if `calculate_rpop' == 0 & "`cont'"~="" {
 			*noi display "	: Continuous"
 			proxcontinous, levels(RCA)
@@ -285,6 +310,10 @@ foreach y of local year_levels{
 //============================================================================================================
 
 if `dropped_zero' == 1 append using "`newfile4'"
+qui drop if M==. 
+if `l0'==1 {
+	cap drop M // If the Mcp matrix was provided by user, there is no need to report it in new dataset
+}
 
 *------------------------------------------------------------------------------
 * Labeling
@@ -305,16 +334,20 @@ cap label var ubiquity "Product Ubiquity"
 * Showing options used in the calculations
 *------------------------------------------------------------------------------
 di " "
-* Options for RCA and Rpop
-if `calculate_rpop' == 0 {
+* Options for RCA and Rpop and M
+if `l0' == 1 {
+	display " : Using  M matrix provided by user"
+}
+
+if `calculate_rpop' == 0 & `l0' == 0 {
 	display " : Using  RCA with threshold of `rca'"
 }
 		
-else if `calculate_rpop' == 1 & `rca' == -1 {
+else if `calculate_rpop' == 1 & `rca' == -1 & `l0' == 0 {
 	display " : Using Rpop with threshold of `rpop'" 	
 }		
 		
-else if `calculate_rpop' == 1 & `rca' != -1 {
+else if `calculate_rpop' == 1 & `rca' != -1 & `l0' == 0 {
 	display " : Using combination of RCA>=`rca' and Rpop>=`rpop'"
 }
 * Options for Proximity matrices

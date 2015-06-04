@@ -46,7 +46,7 @@ cap levelsof `t', local(year_levels)
 quietly levelsof `t', local(Nt)
 global Nnt: word count `Nt'
 display " "
-display "Calculates product density"
+display "Calculates density"
 display "________________________________________________________________________________________________"
 
 if `t_present' == 1  & $Nnt > 1 { 
@@ -135,12 +135,12 @@ foreach y of local year_levels{ // starting main loop
 		}
 
 		if "`contd'"~=""{
-			calculate_density, knn(`knn') cont `self' levels(RCA)
-			calculate_country_density, knn(`knn') cont `self' levels(RCA)
+			calculate_density, knn(`knn') cont `self'
+			calculate_country_density, knn(`knn') cont `self'
 		}
 		else {
-			calculate_density, knn(`knn') `self' levels(RCA)
-			calculate_country_density, knn(`knn') cont `self' levels(RCA)
+			calculate_density, knn(`knn') `self'
+			calculate_country_density, knn(`knn') `self'
 		}
 		
 		*------------------------------------------------------------------------------
