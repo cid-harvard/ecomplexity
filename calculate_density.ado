@@ -5,7 +5,7 @@
 *------------------------------------------------------------------------------
 capture program drop calculate_density
 program calculate_density
-syntax [anything(name=var)], [knn(real -1) levels(name) proxmatrix(name) cont self ]
+syntax [anything(name=var)], [knn(real -1) levels(name) proxmatrix(name) cont leaveout ]
 	*noi di "PRODUCT Density"
 	
 	if ("`proxmatrix'" == "") {
@@ -20,23 +20,28 @@ syntax [anything(name=var)], [knn(real -1) levels(name) proxmatrix(name) cont se
 		*noi di "Set Product density variable to M"
 	}
 	
-	if `knn' == -1 & "`self'"==""{
+	if `knn' == -1 & "`leaveout'"==""{
+		mata weight1 = `proxmatrix':/(J(Npx,Npx,1)* `proxmatrix')
 		mata density = ((`levels'*`proxmatrix'):/(J(Nix,Npx,1)*`proxmatrix'))
+		*noi di "Here 1"
 	}
 	
-	else if `knn' ~= -1 & "`self'"=="" {
+	*noi di "leaveout `leaveout' Cont `cont' Knn `knn'"
+	else if `knn' ~= -1 & "`leaveout'"=="" {
 		mata simi = J(Npx,Npx,0)
 		forval i = 1/$Np { 			
 			mata temp = sort(`proxmatrix'[.,`i'],-1)
 			mata simi[.,`i'] = `proxmatrix'[.,`i'] :* (`proxmatrix'[.,`i'] :>= temp[`knn'])
 		}
 		mata weight = simi:/(J(Npx,Npx,1)* simi)
-		mata density = `levels' * weight	
+		mata density = `levels' * weight
+		mata weight2 = weight
+		*noi di "Here 2"
 	}
 		
 	
-	else if "`self'"~=""{ 
-		noi display "	: Excluding countries while calculating Product Density"
+	else if "`leaveout'"~=""{ 
+		*noi display "	: Excluding countries while calculating Product Density"
 		mata density = J(Nix, Npx, 0)
 		local k_temp = `knn'
 		

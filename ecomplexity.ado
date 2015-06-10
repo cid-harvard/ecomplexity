@@ -5,7 +5,7 @@ program define ecomplexity
 
 version 10
 
-syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont self im(varlist) asym]
+syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont leaveout im(varlist) asym]
 marksample touse
 *----------------------------------------------------------------------
 *----------------------------------------------------------------------
@@ -228,16 +228,16 @@ foreach y of local year_levels{
 		// 			Calculate proximity and density
 		//----------------------------------------------------------------------------
 		*noi di "continuous is `cont'"
-		*noi di "No self is `self'"
+		*noi di "No leaveout is `leaveout'"
 		if `calculate_rpop' == 0 & "`cont'"~="" {
 			*noi display "	: Continuous"
 			proxcontinous, levels(RCA)
-			calculate_density, knn(`knn') `cont' `self' levels(RCA)
+			calculate_density, knn(`knn') `cont' `leaveout' levels(RCA)
 		}
 		else if `calculate_rpop' == 1 & "`cont'"~="" {
 			*noi display "	: Continuous"
 			proxcontinous, levels(RPOP)
-			calculate_density, knn(`knn') `cont' `self'  levels(RPOP)
+			calculate_density, knn(`knn') `cont' `leaveout'  levels(RPOP)
 		}	
 		else {
 			*noi display "	: Discrete"

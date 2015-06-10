@@ -5,28 +5,27 @@
 *------------------------------------------------------------------------------
 capture program drop calculate_country_density
 program calculate_country_density
-syntax [anything(name=var)], [knn(real -1) levels(name) proxmatrix(name) cont self ]
-	noi di "COUNTRY Density"
-	noi di "Country `self'"
+syntax [anything(name=var)], [knn(real -1) levels(name) proxmatrix(name) cont leaveout ]
+	*noi di "COUNTRY Density"
+	*noi di "Country `leaveout'"
 	
 	if ("`proxmatrix'" == "") {
 		local proxmatrix country_proximity
 	}
 	if ("`levels'" == "" & "`cont'"~="") {
 		local levels RCA
-		noi di "Set Continous Country density variable to RCA"
+		*noi di "Set Continous Country density variable to RCA"
 	}
 	if ("`levels'" == "" & "`cont'"=="") {
 		local levels M
-		noi di "Set Discrete Country density variable to M"
+		*noi di "Set Discrete Country density variable to M"
 	}
 	
-	if `knn' == -1 & "`self'"==""{
+	if `knn' == -1 & "`leaveout'"==""{
 		mata country_density = ((`levels''*`proxmatrix'):/(J(Npx,Nix,1)*`proxmatrix'))
-		noi di "Here 1"
 	}
 
-	else if `knn' ~= -1 & "`self'"=="" {
+	else if `knn' ~= -1 & "`leaveout'"=="" {
 		mata simi = J(Nix,Nix,0)
 		forval i = 1/$Ni { 			
 			mata temp = sort(`proxmatrix'[.,`i'],-1)
@@ -34,17 +33,17 @@ syntax [anything(name=var)], [knn(real -1) levels(name) proxmatrix(name) cont se
 		}
 		mata weight = simi:/(J(Nix,Nix,1)* simi)
 		mata country_density = `levels'' * weight 	
-		noi di "Here 2"
+		*noi di "Here 2"
 	}
 	
-	else if "`self'"~=""{ 
-		noi display "	: Excluding products while calculating Country Density"
-		noi di "Here 3"
+	else if "`leaveout'"~=""{ 
+		*noi display "	: Excluding products while calculating Country Density"
+		*noi di "Here 3"
 		mata country_density = J(Npx, Nix, 0)
 		local k_temp = `knn'
 		if `knn' == -1 {
 			local k_temp = $Ni
-			noi di "ktemp is `k_temp' and Number of countries $Ni"
+			*noi di "ktemp is `k_temp' and Number of countries $Ni"
 		}
 		forval i = 1/$Np {
 			mata temp_v = J(Npx,1,1) // This indicator vector is going to be used to eliminate the ith row of the diagonal matrix		

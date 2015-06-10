@@ -3,7 +3,7 @@ cap program drop pdensity
 program define pdensity
 *----------------------------------------------------------------------------------------
 
-syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) contp contd self im(varlist) asym]
+syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real 1) rpop(real -1) knn(real -1) contp contd leaveout im(varlist) asym]
 marksample touse
 *----------------------------------------------------------------------
 *----------------------------------------------------------------------
@@ -126,7 +126,7 @@ foreach y of local year_levels{ // starting main loop
 		
 		complexity_rca
 		mata M = (RCA:>`rca')
-			
+		noi di "RCA threshold is `rca'"
 		if "`contp'"~=""{
 			proxcontinous, levels(RCA)
 		}
@@ -135,12 +135,12 @@ foreach y of local year_levels{ // starting main loop
 		}
 
 		if "`contd'"~=""{
-			calculate_density, knn(`knn') cont `self'
-			calculate_country_density, knn(`knn') cont `self'
+			calculate_density, knn(`knn') cont `leaveout'
+			calculate_country_density, knn(`knn') cont `leaveout'
 		}
 		else {
-			calculate_density, knn(`knn') `self'
-			calculate_country_density, knn(`knn') `self'
+			calculate_density, knn(`knn') `leaveout'
+			calculate_country_density, knn(`knn') `leaveout'
 		}
 		
 		*------------------------------------------------------------------------------
