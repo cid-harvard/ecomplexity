@@ -3,9 +3,11 @@ cap program drop ecomplexity
 program define ecomplexity
 *----------------------------------------------------------------------------------------
 
+// net install ecomplexity, from("https://raw.githubusercontent.com/cid-harvard/ecomplexity/beta/") force
+
 version 10
 
-syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont leaveout im(varlist) asym]
+syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont leaveout im(varlist) asym bi]
 marksample touse
 *----------------------------------------------------------------------
 *----------------------------------------------------------------------
@@ -66,12 +68,15 @@ else {
 qui sum `val'
 local l1 = r(min)
 local l2 = r(max)
-if `l1'==0 & `l2'==1 {
+if (`l1'==0 & `l2'==1)  | "`bi'"~="" {
 	local l0 = 1   
 }
 else {
 	local l0 = 0 
 }
+
+
+
 *----------------------------------------------------------------------
 
 sort `t' `i' `p'
