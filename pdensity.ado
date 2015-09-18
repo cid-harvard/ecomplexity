@@ -3,7 +3,7 @@ cap program drop pdensity
 program define pdensity
 *----------------------------------------------------------------------------------------
 
-syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real 1) rpop(real -1) knn(real -1) contp contd leaveout im(varlist) asym]
+syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real 1) rpop(real -1) knn(real -1) contp contd usevar leaveout im(varlist) asym]
 marksample touse
 *----------------------------------------------------------------------
 *----------------------------------------------------------------------
@@ -63,6 +63,11 @@ quietly {
 }
 *----------------------------------------------------------------------
 
+if ("`levels'" == "" & "`contd'"~="") {
+		local levels RCA
+		*noi di "Set Product density variable to RCA"
+}
+	
 //============================================================================================================
 foreach y of local year_levels{ // starting main loop
 		if `t_present' == 1  & $Nnt > 1 { 
@@ -88,7 +93,7 @@ foreach y of local year_levels{ // starting main loop
 			}
 		}
 		*------------------------------------------------
-		
+/*		
 		*------------------------------------------------
 		* Checks data for the running year
 		*------------------------------------------------
@@ -116,7 +121,7 @@ foreach y of local year_levels{ // starting main loop
 			}
 		}
 		*------------------------------------------------
-		
+	*/	
 		*------------------------------------------------
 		* Loads data into Mata matrices 
 		*------------------------------------------------
@@ -127,26 +132,35 @@ foreach y of local year_levels{ // starting main loop
 		complexity_rca
 		mata M = (RCA:>`rca')
 		noi di "RCA threshold is `rca'"
-		if "`contp'"~=""{
-			proxcontinous, levels(RCA)
+		
+		if "`usevar'"~=""{
+			local levels exp_cp
+		}
+		else {
+			local levels RCA
+		}
+		
+		if "`contp'"~="" {
+			proxcontinous, levels("`levels'")
 		}
 		else{
 			proxdiscrete
 		}
 
 		if "`contd'"~=""{
-			calculate_density, knn(`knn') cont `leaveout'
-			calculate_country_density, knn(`knn') cont `leaveout'
+			calculate_density, knn(`knn') cont levels("`levels'") `leaveout'
+			*calculate_country_density, knn(`knn') cont levels("`levels'") `leaveout'
 		}
 		else {
-			calculate_density, knn(`knn') `leaveout'
-			calculate_country_density, knn(`knn') `leaveout'
+			calculate_density, knn(`knn') levels("`levels'") `leaveout'
+			*calculate_country_density, knn(`knn') levels("`levels'") `leaveout'
 		}
 		
 		*------------------------------------------------------------------------------
 		* Turns matrices into stata dataset shape
 		*------------------------------------------------------------------------------
-		foreach var in density country_density{ 
+		*foreach var in density country_density{
+		foreach var in density { 
    			mata tostata = colshape(`var',1)
    			qui mata newvar_row = st_addvar("double", "`var'")
   			qui mata st_store(.,newvar_row,"`touse'",tostata)

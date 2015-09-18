@@ -33,12 +33,10 @@ syntax [anything(name=var)], [knn(real -1) levels(name) proxmatrix(name) cont le
 		}
 		mata weight = simi:/(J(Nix,Nix,1)* simi)
 		mata country_density = `levels'' * weight 	
-		*noi di "Here 2"
 	}
 	
 	else if "`leaveout'"~=""{ 
 		*noi display "	: Excluding products while calculating Country Density"
-		*noi di "Here 3"
 		mata country_density = J(Npx, Nix, 0)
 		local k_temp = `knn'
 		if `knn' == -1 {

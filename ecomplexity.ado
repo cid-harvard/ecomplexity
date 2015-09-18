@@ -7,7 +7,7 @@ program define ecomplexity
 
 version 10
 
-syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont leaveout im(varlist) asym bi]
+syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont leaveout im(varlist) asym bi piet]
 marksample touse
 *----------------------------------------------------------------------
 *----------------------------------------------------------------------
@@ -20,7 +20,7 @@ local dropped_zero = 0
 // Drop Variables that can confuse the output
 *----------------------------------------------------------------------
 local errorexistenvar=0
-local create_variables M RCA RPOP rca rpop mcp density eci pci coi cog kc0 kp0 diversity ubiquity _merge _fillin id_i id_p
+local create_variables M RCA RPOP rca rpop mcp density eci pci coi cog kc0 kp0 diversity ubiquity _merge _fillin id_i id_p piet_c piet_p
 foreach var in `create_variables' {
 	cap drop `var'
 	*noi di "`var'" _rc
@@ -62,7 +62,7 @@ else {
 *----------------------------------------------------------------------
 * M matrix provided? Detecting binary dataset
 *----------------------------------------------------------------------
-*noi di "Binary detection" 
+
 // if main variable is already in a binary format, 
 // the program will asume it corresponds to the Mcp Matrix
 qui sum `val'
@@ -70,6 +70,7 @@ local l1 = r(min)
 local l2 = r(max)
 if (`l1'==0 & `l2'==1)  | "`bi'"~="" {
 	local l0 = 1   
+	noi di "Binary variable detected"
 }
 else {
 	local l0 = 0 
@@ -260,7 +261,10 @@ foreach y of local year_levels{
 		coicog	 /* calculates complexity outlook uindex and gain */
 		*============================================================
 		
-		
+		if "`piet'"~="" {
+			pietronero
+		}
+			
 		*------------------------------------------------------------------------------
 		* Turns matrices into stata dataset shape
 		*------------------------------------------------------------------------------
@@ -279,6 +283,15 @@ foreach y of local year_levels{
    			qui mata newvar_row = st_addvar("double", "`var'")
   			qui mata st_store(.,newvar_row,"`touse'",tostata)
 		}
+		
+		if "`piet'"~="" {
+			foreach var in piet_c piet_p { 
+				mata tostata = colshape(`var',1)
+				qui mata newvar_row = st_addvar("double", "`var'")
+				qui mata st_store(.,newvar_row,"`touse'",tostata)
+			}
+		}
+		
 		*------------------------------------------------------------------------------
 		
 		quietly{      
@@ -333,6 +346,8 @@ cap label var eci "Economic Complexity Index"
 cap label var pci "Product Complexity Index"
 cap label var diversity "Country Diversity"
 cap label var ubiquity "Product Ubiquity"
+cap label var piet_c "Country Measure of Pietronero"
+cap label var piet_p "Product Measure of Pietronero"
 *------------------------------------------------------------------------------
 
 *------------------------------------------------------------------------------
