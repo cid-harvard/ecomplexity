@@ -71,7 +71,7 @@ local l1 = r(min)
 local l2 = r(max)
 if (`l1'==0 & `l2'==1)  | "`bi'"~="" {
 	local l0 = 1
-	noi di “ “   
+	noi di ""
 	noi di "Binary variable detected"
 }
 else {
