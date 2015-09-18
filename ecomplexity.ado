@@ -3,7 +3,7 @@ cap program drop ecomplexity
 program define ecomplexity
 *----------------------------------------------------------------------------------------
 
-// net install ecomplexity, from("https://raw.githubusercontent.com/cid-harvard/ecomplexity/beta/") force
+// net install ecomplexity, from("https://raw.githubusercontent.com/cid-harvard/ecomplexity/master/“) force
 
 version 10
 
