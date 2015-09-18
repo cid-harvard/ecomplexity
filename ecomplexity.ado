@@ -3,9 +3,11 @@ cap program drop ecomplexity
 program define ecomplexity
 *----------------------------------------------------------------------------------------
 
+// net install ecomplexity, from("https://raw.githubusercontent.com/cid-harvard/ecomplexity/beta/") force
+
 version 10
 
-syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont self im(varlist) asym]
+syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont leaveout im(varlist) asym bi piet]
 marksample touse
 *----------------------------------------------------------------------
 *----------------------------------------------------------------------
@@ -18,7 +20,7 @@ local dropped_zero = 0
 // Drop Variables that can confuse the output
 *----------------------------------------------------------------------
 local errorexistenvar=0
-local create_variables M RCA RPOP rca rpop mcp density eci pci coi cog kc0 kp0 diversity ubiquity _merge _fillin id_i id_p
+local create_variables M RCA RPOP rca rpop mcp density eci pci coi cog kc0 kp0 diversity ubiquity _merge _fillin id_i id_p piet_c piet_p
 foreach var in `create_variables' {
 	cap drop `var'
 	*noi di "`var'" _rc
@@ -56,13 +58,35 @@ else {
 }
 *----------------------------------------------------------------------
 
+
+*----------------------------------------------------------------------
+* M matrix provided? Detecting binary dataset
+*----------------------------------------------------------------------
+
+// if main variable is already in a binary format, 
+// the program will asume it corresponds to the Mcp Matrix
+qui sum `val'
+local l1 = r(min)
+local l2 = r(max)
+if (`l1'==0 & `l2'==1)  | "`bi'"~="" {
+	local l0 = 1   
+	noi di "Binary variable detected"
+}
+else {
+	local l0 = 0 
+}
+
+
+
+*----------------------------------------------------------------------
+
 sort `t' `i' `p'
 
 cap levelsof `t', local(year_levels)
 
 quietly levelsof `t', local(Nt)
 global Nnt: word count `Nt'
-
+display " "
 display "Creates economic complexity variables"
 display "________________________________________________________________________________________________"
 if `t_present' == 1  & $Nnt > 1 { 
@@ -165,13 +189,16 @@ foreach y of local year_levels{
 		if $error_code == 1 exit // error checking
 		*------------------------------------------------
 		
-		
+		// Inmediate Mcp
+		if `l0'==1 {
+			mata M = exp_cp
+		}
 		
 		*------------------------------------------------
 		* Calculate RCA and Rpop
 		*------------------------------------------------
 		// calculate RCA case
-		if `calculate_rpop' == 0 {
+		if `calculate_rpop' == 0 & `l0'==0 {
 			if `rca' == -1 {
 				local rca 1
 			}
@@ -180,14 +207,16 @@ foreach y of local year_levels{
 		}
 		
 		// calculate Rpop case
-		else if `calculate_rpop' == 1 & `rca' == -1 {
+		else if `calculate_rpop' == 1 & `rca' == -1 & `l0'==0 {
 			load_population_mata `i' `pop' `touse'
 			complexity_rpop
 			mata M = (RPOP:>`rpop')
 		}
+		
 		if $error_code == 1 exit		
+		
 		// combination of the two (RCA AND Rpop)
-		else if `calculate_rpop' == 1 & `rca' != -1 {
+		else if `calculate_rpop' == 1 & `rca' != -1 & `l0'==0 {
 			load_population_mata `i' `pop' `touse'
 			complexity_rca
 			complexity_rpop
@@ -196,23 +225,25 @@ foreach y of local year_levels{
 			mata M = M1 + M2 
 			mata M = (M:>0)
 		}
+		
+		
 		*------------------------------------------------
 		
 		
 		//----------------------------------------------------------------------------
 		// 			Calculate proximity and density
 		//----------------------------------------------------------------------------
-		// noi di "continuous is `cont'"
-		// noi di "No self is `self'"
+		*noi di "continuous is `cont'"
+		*noi di "No leaveout is `leaveout'"
 		if `calculate_rpop' == 0 & "`cont'"~="" {
 			*noi display "	: Continuous"
 			proxcontinous, levels(RCA)
-			calculate_density, knn(`knn') `cont' `self' levels(RCA)
+			calculate_density, knn(`knn') `cont' `leaveout' levels(RCA)
 		}
 		else if `calculate_rpop' == 1 & "`cont'"~="" {
 			*noi display "	: Continuous"
 			proxcontinous, levels(RPOP)
-			calculate_density, knn(`knn') `cont' `self'  levels(RPOP)
+			calculate_density, knn(`knn') `cont' `leaveout'  levels(RPOP)
 		}	
 		else {
 			*noi display "	: Discrete"
@@ -230,7 +261,10 @@ foreach y of local year_levels{
 		coicog	 /* calculates complexity outlook uindex and gain */
 		*============================================================
 		
-		
+		if "`piet'"~="" {
+			pietronero
+		}
+			
 		*------------------------------------------------------------------------------
 		* Turns matrices into stata dataset shape
 		*------------------------------------------------------------------------------
@@ -249,6 +283,15 @@ foreach y of local year_levels{
    			qui mata newvar_row = st_addvar("double", "`var'")
   			qui mata st_store(.,newvar_row,"`touse'",tostata)
 		}
+		
+		if "`piet'"~="" {
+			foreach var in piet_c piet_p { 
+				mata tostata = colshape(`var',1)
+				qui mata newvar_row = st_addvar("double", "`var'")
+				qui mata st_store(.,newvar_row,"`touse'",tostata)
+			}
+		}
+		
 		*------------------------------------------------------------------------------
 		
 		quietly{      
@@ -285,6 +328,10 @@ foreach y of local year_levels{
 //============================================================================================================
 
 if `dropped_zero' == 1 append using "`newfile4'"
+qui drop if M==. 
+if `l0'==1 {
+	cap drop M // If the Mcp matrix was provided by user, there is no need to report it in new dataset
+}
 
 *------------------------------------------------------------------------------
 * Labeling
@@ -299,22 +346,28 @@ cap label var eci "Economic Complexity Index"
 cap label var pci "Product Complexity Index"
 cap label var diversity "Country Diversity"
 cap label var ubiquity "Product Ubiquity"
+cap label var piet_c "Country Measure of Pietronero"
+cap label var piet_p "Product Measure of Pietronero"
 *------------------------------------------------------------------------------
 
 *------------------------------------------------------------------------------
 * Showing options used in the calculations
 *------------------------------------------------------------------------------
 di " "
-* Options for RCA and Rpop
-if `calculate_rpop' == 0 {
+* Options for RCA and Rpop and M
+if `l0' == 1 {
+	display " : Using  M matrix provided by user"
+}
+
+if `calculate_rpop' == 0 & `l0' == 0 {
 	display " : Using  RCA with threshold of `rca'"
 }
 		
-else if `calculate_rpop' == 1 & `rca' == -1 {
+else if `calculate_rpop' == 1 & `rca' == -1 & `l0' == 0 {
 	display " : Using Rpop with threshold of `rpop'" 	
 }		
 		
-else if `calculate_rpop' == 1 & `rca' != -1 {
+else if `calculate_rpop' == 1 & `rca' != -1 & `l0' == 0 {
 	display " : Using combination of RCA>=`rca' and Rpop>=`rpop'"
 }
 * Options for Proximity matrices

@@ -1,5 +1,5 @@
 {smcl}
-{* 20july2014}{...}
+{* 18Sept2015}{…}
 {hline}
 help for {hi: ecomplexity}
 {hline}
@@ -25,12 +25,12 @@ help for {hi: ecomplexity}
 
 {title:Description:}
 
-{p 4 4}{cmd:ecomplexity} Calculates the economic complexity variables used in The Atlas of Economic Complexity. 
+{p 4 4}{cmd:ecomplexity} Calculates the Economic Complexity variables used in The Atlas of Economic Complexity. 
 
 
 {title:Options:}
 
-{p 4 8}{cmd:varlist} contains the values over which the calculations will be performed; see help {cmd:varlist}. {p_end}
+{p 4 8}{cmd:varlist} contains the values over which the calculations will be performed; If varlist is a binary variable, the code will assume it corresponds to the matrix of the network needed for the calculations. See help {cmd:varlist}. {p_end}
 
 {p 4 8}{cmd:i(}{it:variable1}{cmd:)}, (must be provided), specifies the name of the location variable. {it:variable1} could be either string or numeric. {p_end}
  
