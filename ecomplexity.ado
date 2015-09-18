@@ -3,21 +3,21 @@ cap program drop ecomplexity
 program define ecomplexity
 *----------------------------------------------------------------------------------------
 
-// net install ecomplexity, from("https://raw.githubusercontent.com/cid-harvard/ecomplexity/master/“) force
+// net install ecomplexity, from("https://raw.githubusercontent.com/cid-harvard/ecomplexity/master/") force
 
 version 10
-
 syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont leaveout im(varlist) asym bi piet]
+
+
+*----------------------------------------------------------------------
 marksample touse
-*----------------------------------------------------------------------
-*----------------------------------------------------------------------
 tokenize "`varlist'"
 local val = "`1'"
 global error_code = 0
 local dropped_zero = 0
 
 *----------------------------------------------------------------------
-// Drop Variables that can confuse the output
+// Drop variables that can confuse the output
 *----------------------------------------------------------------------
 local errorexistenvar=0
 local create_variables M RCA RPOP rca rpop mcp density eci pci coi cog kc0 kp0 diversity ubiquity _merge _fillin id_i id_p piet_c piet_p
@@ -28,6 +28,7 @@ foreach var in `create_variables' {
 		noi display "________________________________________________________________________________________________"
 		noi di "Warning!! At least one output variable name was present in the dataset."
 		noi di "Will delete those variables from memory!!"
+		noi display "________________________________________________________________________________________________"
 		local errorexistenvar=1
 	}
 }
@@ -69,7 +70,8 @@ qui sum `val'
 local l1 = r(min)
 local l2 = r(max)
 if (`l1'==0 & `l2'==1)  | "`bi'"~="" {
-	local l0 = 1   
+	local l0 = 1
+	noi di “ “   
 	noi di "Binary variable detected"
 }
 else {
