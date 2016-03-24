@@ -14,6 +14,6 @@ syntax varlist
 		drop `temppop'
 	}
 	
-	mata temp_long=st_data(.,"`pop'", "`touse'") // loads values of export/production into the matrix in long format 
+	mata temp_long=st_data(.,"`pop'", "`touse'") // loads values into the matrix in long format 
 	mata pop_cp = rowshape(temp_long,Nix)  // reshape the data into a square matrix
 end
