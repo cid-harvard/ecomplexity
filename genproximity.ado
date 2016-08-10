@@ -12,9 +12,6 @@ tokenize "`varlist'"
 local val = "`1'"
 
 
-
-
-
 // Drop Variables that can confuse the output
 local create_variables M RCA rca rpop mcp density eci pci oppval oppgain _fillin id_i id_p
 foreach var in `create_variables' {
@@ -191,7 +188,7 @@ foreach y of local year_levels{
 			gen id_2 = _n
 			
 			forval j = 1/2 {
-				merge 1:1 id_`j' using temp_id_p_`j'
+				merge 1:1 id_`j' using temp_id_p_`j'.dta
 				drop _merge id_`j'
 				erase "temp_id_p_`j'.dta"
 			}
@@ -201,13 +198,22 @@ foreach y of local year_levels{
 			if `t_present' == 1 { 
 				gen `t' = `y'
 			}
-			
+			sort `p'_1 `p'_2
+			*gen byte touse = 1 
+			*mata proximity = proximity'
 			foreach var in proximity { 
+				cap drop `var'
 	   			mata tostata = colshape(`var',1)
 	   			qui mata newvar_row = st_addvar("double", "`var'")
-	  			qui mata st_store(.,newvar_row,tostata)
+	  			qui mata st_store(.,newvar_row, tostata)
+				*mata st_store(.,newvar_row, "`touse'", tostata)
 			}
-		 	drop if `p'_1 == `p'_2
+			
+					*mata tostata = colshape(`var',1)
+					*qui mata newvar_row = st_addvar("float", "`var'")
+					*cap mata st_store(.,newvar_row, "`touse'", tostata)
+					
+		 	*drop if `p'_1 == `p'_2
 		 	
 		 	// saves the results for the year, opens the file were we store the data 
 			save "`newfile3'", replace
@@ -217,17 +223,12 @@ foreach y of local year_levels{
 		}
 
 }
+
+keep `p'_1  `p'_2  proximity // touse
 *=====================================================================================
-cap rename RCA rca
-cap label var year "Year"
-cap label var rca "Revealed Comparative Advantage (RCA)"
-cap label var density "Product Density "
-cap label var oppval "Opportunity Value"
-cap label var oppgain "Opportunity Gain"
-cap label var eci "Economic Complexity Index" 
-cap label var pci "Product Complexity Index"
-*cap label var kc "Country Diversity"
-*cap label var kp "Product Ubiquity"
+
+cap label var proximity "Proximity"
+
 *=====================================================================================
 di " "
 
@@ -261,6 +262,7 @@ else {
 
 }
 
+noi di "FINAL"
 
 *=====================================================================================		
 display "________________________________________________________________________________________________"

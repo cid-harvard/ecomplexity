@@ -28,17 +28,9 @@ syntax varlist
 		global error_code = 1
 		exit
 	}
-	
+	sort `t' `i' `p' 
 	/// matrix calculations 		
 	mata temp_long=st_data(.,"`val'", "`touse'") // loads values of export/production into the matrix in long format
 	mata exp_cp = rowshape(temp_long,Nix)  // reshape the data into a square matrix
 	
 end
-
-/*
-di $Ni
-di $Np
-mata Nix
-mata mata desc
-mata exp_cp
-*/

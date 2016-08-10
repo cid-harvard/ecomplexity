@@ -9,7 +9,7 @@ program ecipci
 
 	mata Mptilde=((M:/kp0):/kc0)'*M
 	mata eigensystem(Mptilde,Vp=.,lp=.)		
-	mata kp=Re(Vp[.,2]) 			// complexity: second eigenvector
+	mata kp=Re(Vp[.,2]) 					// complexity: second eigenvector
 	mata kc = (M:/kc0_all) * kp				// complexity: second eigenvector
 
 	mata kc01d = M*J(Npx,1,1)

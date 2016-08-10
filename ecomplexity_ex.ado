@@ -206,7 +206,7 @@ foreach y of local year_levels{
 		}
 		
 		*===================================
-		calculate_coherence /* calculates eigenvector */
+		calculate_coherence /* calculates coherence */
 		*===================================
 		
 		*===================================

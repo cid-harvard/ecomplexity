@@ -6,7 +6,8 @@ program define ecomplexity
 // net install ecomplexity, from("https://raw.githubusercontent.com/cid-harvard/ecomplexity/master/") force
 
 version 10
-syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) rpop(real -1) knn(real -1) cont leaveout im(varlist) asym bi piet]
+syntax varlist [if/], i(varlist) p(varlist) [t(varlist) pop(varlist) rca(real -1) ///
+						rpop(real -1) knn(real -1) knnt(real -1) cont leaveout im(varlist) asym bi piet]
 
 
 *----------------------------------------------------------------------
@@ -240,17 +241,17 @@ foreach y of local year_levels{
 		if `calculate_rpop' == 0 & "`cont'"~="" {
 			*noi display "	: Continuous"
 			proxcontinous, levels(RCA)
-			calculate_density, knn(`knn') `cont' `leaveout' levels(RCA)
+			calculate_density, knn(`knn') knnt(`knnt') `cont' `leaveout' levels(RCA)
 		}
 		else if `calculate_rpop' == 1 & "`cont'"~="" {
 			*noi display "	: Continuous"
 			proxcontinous, levels(RPOP)
-			calculate_density, knn(`knn') `cont' `leaveout'  levels(RPOP)
+			calculate_density, knn(`knn') knnt(`knnt') `cont' `leaveout'  levels(RPOP)
 		}	
 		else {
 			*noi display "	: Discrete"
-			proxdiscrete, `asym'
-			calculate_density, knn(`knn')
+			proxdiscrete, `asym' 
+			calculate_density, knn(`knn') knnt(`knnt') `leaveout' `asym'
 		}
 		//----------------------------------------------------------------------------
 		
