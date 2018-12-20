@@ -307,6 +307,8 @@ foreach y of local year_levels{
 			
 			*------------------------------------------------------------------------------
 			// Normalization: mean of zero and st dev of 1
+			/* Note: PCI values are normalized using ECI mean and st dev to preserve property
+				 that ECI = (mean of PCI's of products for which MCP=1) */
 			*------------------------------------------------------------------------------
 			// ECI
 			sum eci
