@@ -1,6 +1,6 @@
 *----------------------------------------------------------------------------------------
-cap program drop ecomplexity
-program define ecomplexity
+cap program drop ecomplexity_no_normalization
+program define ecomplexity_no_normalization
 *----------------------------------------------------------------------------------------
 
 // net install ecomplexity, from("https://raw.githubusercontent.com/cid-harvard/ecomplexity/master/") force
@@ -78,7 +78,7 @@ if (`l1'==0 & `l2'==1)  | "`bi'"~="" {
 else {
 	local l0 = 0 
 }
-*----------------------------------------------------------------------
+
 
 
 *----------------------------------------------------------------------
@@ -308,6 +308,7 @@ foreach y of local year_levels{
 			*------------------------------------------------------------------------------
 			// Normalization: mean of zero and st dev of 1
 			*------------------------------------------------------------------------------
+			/*
 			// ECI
 			sum eci
 			replace eci = (eci-r(mean))/r(sd)
@@ -316,6 +317,7 @@ foreach y of local year_levels{
 			// OPPVAL
 			sum coi
 			replace coi = (coi-r(mean))/r(sd)
+			*/
 			*------------------------------------------------------------------------------
 			
 			

@@ -6,7 +6,7 @@
 capture program drop calculate_density
 program calculate_density
 syntax [anything(name=var)], [knn(real -1) knnt(real -1) levels(name) proxmatrix(name) cont leaveout asym]
-	*noi di "PRODUCT Density"
+	noi di "PRODUCT Density"
 	
 	if ("`proxmatrix'" == "") {
 		local proxmatrix proximity
@@ -26,6 +26,7 @@ syntax [anything(name=var)], [knn(real -1) knnt(real -1) levels(name) proxmatrix
 		mata temp_density = density
 	}
 	
+	mata st_global("Np", strofreal(Npx))
 	*noi di "leaveout `leaveout' Cont `cont' Knn `knn'"
 	else if `knn' ~= -1 & "`leaveout'"=="" {
 		mata simi = J(Npx,Npx,0)

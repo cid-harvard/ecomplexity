@@ -27,6 +27,26 @@ else {
 	local t_present 1
 }
 
+
+*----------------------------------------------------------------------
+* M matrix provided? Detecting binary dataset
+*----------------------------------------------------------------------
+
+// if main variable is already in a binary format, 
+// the program will asume it corresponds to the Mcp Matrix
+qui sum `val'
+local l1 = r(min)
+local l2 = r(max)
+if (`l1'==0 & `l2'==1)  | "`bi'"~="" {
+	local l0 = 1
+	noi di ""
+	noi di "Binary variable detected"
+}
+else {
+	local l0 = 0 
+}
+*----------------------------------------------------------------------
+
 sort `t' `i' `p'
 
 cap levelsof `t', local(year_levels)
@@ -136,8 +156,17 @@ foreach y of local year_levels{
 		}
 		
 		load_export_mata `t' `i' `p' `val' `touse'
+		if $error_code == 1 exit // error checking
+		*------------------------------------------------
+		
+		// Inmediate Mcp
+		if `l0'==1 {
+			mata M = exp_cp
+		}
+		
 			
-		if `calculate_rpop' == 0 {
+		// calculate RCA case
+		if `calculate_rpop' == 0 & `l0'==0 {
 			if `rca' == -1 {
 				local rca 1
 			}
@@ -145,13 +174,15 @@ foreach y of local year_levels{
 			mata M = (RCA:>`rca')
 		}
 		
-		else if `calculate_rpop' == 1 & `rca' == -1 {
+		// calculate Rpop case
+		else if `calculate_rpop' == 1 & `rca' == -1 & `l0'==0 {
 			load_population_mata `i' `pop' `touse'
 			complexity_rpop
 			mata M = (RPOP:>`rpop')
 		}
 		
-		else if `calculate_rpop' == 1 & `rca' != -1 {
+		// combination of the two (RCA AND Rpop)
+		else if `calculate_rpop' == 1 & `rca' != -1 & `l0'==0 {
 			load_population_mata `i' `pop' `touse'
 			complexity_rca
 			complexity_rpop
