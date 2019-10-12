@@ -1,5 +1,6 @@
 *===========================================================================		
 // Calculate Pietrenero Complexity Values
+*===========================================================================
 capture program drop pietronero
 program pietronero
 syntax [anything(name=var)], [pietnum(real 50)]
@@ -25,3 +26,4 @@ syntax [anything(name=var)], [pietnum(real 50)]
 	mata piet_p = J(Nix, 1, 1) * piet_p'
 
 end
+*===========================================================================
