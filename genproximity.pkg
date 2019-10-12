@@ -3,7 +3,16 @@ d genproximity. Program to create a dataset with proximities.
 d Sebastian Bustos & Muhammed Yildirim, Harvard University.
 f ecomplexity.ado
 f genproximity.ado
-f calculate_density.adof complexity_rca.adof complexity_rpop.ado
-f coicog.adof ecipci.ado
-f load_export_mata.adof load_population_mata.adof proxdiscrete.adof proxcontinous.adof ecomplexity.sthlp
+f calculate_density.ado
+f complexity_rca.ado
+f complexity_rpop.ado
+f coicog.ado
+f ecipci.ado
+f load_export_mata.ado
+f load_population_mata.ado
+f proxdiscrete.ado
+f pietronero.ado
+f ecomplexity_ex.ado
+f proxcontinous.ado
+f ecomplexity.sthlp
 f genproximity.sthlp
