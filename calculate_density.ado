@@ -6,7 +6,7 @@
 capture program drop calculate_density
 program calculate_density
 syntax [anything(name=var)], [knn(real -1) knnt(real -1) levels(name) proxmatrix(name) cont leaveout asym]
-	noi di "PRODUCT Density"
+	// noi di "PRODUCT Density"
 	
 	if ("`proxmatrix'" == "") {
 		local proxmatrix proximity
