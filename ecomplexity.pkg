@@ -12,5 +12,7 @@ f load_export_mata.ado
 f load_population_mata.ado
 f proxdiscrete.ado
 f proxcontinous.ado
+f pietronero.ado
+f ecomplexity_ex.ado
 f ecomplexity.sthlp
 f genproximity.sthlp
